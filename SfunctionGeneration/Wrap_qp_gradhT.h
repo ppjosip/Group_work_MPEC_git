@@ -1,0 +1,1 @@
+void Wrap_qp_gradhT(double xu[], double p[], double y[]);

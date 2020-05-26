@@ -3,31 +3,32 @@ function  out = NMPC_Matlab_singlestep(qp_W,qp_gradJ,qp_gradhT,qp_h,FJk,parNMPC,
 % Initial guess
 
 % Initialization
-optVars   	= zeros(parNMPC.nOptVars,1);
-lambda      = zeros(parNMPC.nConstr,1);     % Dual variables for linear inequality
+optVars   	= parNMPC.optVars0;
+lambda      = parNMPC.lambda0;      % Dual variables for linear inequality
                                     % constraints (as used in qpOASES):
                                     % lbA <= Ax <= ubA
-mu          = zeros(nOptVars,1);    % Dual variables for lower and upper 
+mu          = parNMPC.mu0;          % Dual variables for lower and upper 
                                     % bounds on optimization variables:
                                     % lb <= x <= ub
 kktCond     = Inf*ones(parNMPC.nOptVars+parNMPC.nConstr,1);
 kSQP     	= 1;
 
-
+% Pre-define
+p = [parNMPC.x0; parNMPC.uprev; parSim.ref.p_im.data(1); parSim.ref.x_bg.data(1); parNMPC.Q1_val; parNMPC.Q2_val; parNMPC.R1_val; parNMPC.R2_val];
 
 % SQP iterations until stopping criteria reached
 tic
-while (norm(kktCond,2) >= parNMPC.kktTol) && (kSQP <= parNMPC.QPMaxIter)
+while (norm(kktCond,2) >= parNMPC.kktTol) && (kSQP <= parNMPC.nSQP)
     
     % Get numerical values for QP matrices/vectors and bounds
-    W       = full(qp_W(optVars,lambda));
-    gradJ 	= full(qp_gradJ(optVars));
-    gradhT  = full(qp_gradhT(optVars));
-    h     	= full(qp_h(optVars));
+    W       = full(qp_W(optVars,[p; lambda]));
+    gradJ 	= full(qp_gradJ(optVars, p));
+    gradhT  = full(qp_gradhT(optVars, p));
+    h     	= full(qp_h(optVars, p));
     
     % Set proper bounds for s_xk = x(k+1) - x(k)
-    lb_sxk 	= lb - optVars;
-    ub_sxk	= ub - optVars;
+    lb_sxk 	= parNMPC.lbx - optVars;
+    ub_sxk	= parNMPC.ubx - optVars;
     
     % Evaluation of KKT conditions
     kktCond = [gradJ - gradhT'*lambda - mu; h];
@@ -83,6 +84,7 @@ while (norm(kktCond,2) >= parNMPC.kktTol) && (kSQP <= parNMPC.QPMaxIter)
 end % while
 time_to_solve = toc;
 
+%Generate Solution
 out.optVarsPred = optVars;
 
 end

@@ -20,7 +20,7 @@ else
 end % if
 addpath('../../providedCode/qpOASES_Matlab');
 addpath('../../providedCode/qpOASES_Simulink');
-addpath('../../providedCode/SfunctionGeneration');
+addpath('C:\Users\Josip Pavlovic\Desktop\Model Predictive Engine Control\Group_Work_MPEC_git\SfunctionGeneration')%('../../providedCode/SfunctionGeneration');
 addpath('../../providedCode/MVM');
 
 %% NMPC Parameters for the NLP formulation with CasADi
